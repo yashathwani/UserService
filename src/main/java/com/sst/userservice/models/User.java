@@ -1,6 +1,7 @@
 package com.sst.userservice.models;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 
 import jakarta.persistence.ManyToMany;
@@ -16,7 +17,7 @@ public class User extends BaseModel{
     private String name;
     private String email;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
 
     private String hashedPassword;
