@@ -276,19 +276,34 @@ jobs:
             -e SPRING_DATASOURCE_USERNAME=user \
             -e SPRING_DATASOURCE_PASSWORD=user1234 \
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-          sleep 20
 
-      - name: Check Container Logs
-        if: always()
-        run: docker logs userservice
-
-      - name: Health Check
+      - name: Diagnostic - Container Status
         run: |
-          curl -f http://localhost:4141/actuator/health || exit 1
+          docker ps -a
+          sleep 5
+          docker logs userservice
 
-      - name: Stop Container
+      - name: Health Check (Wait for Ready)
+        run: |
+          echo "Waiting for app to be ready (targeting http://localhost:4141/actuator/health)..."
+          for i in {1..20}; do
+            if curl -s -f http://localhost:4141/actuator/health | grep -q '"status":"UP"'; then
+              echo "App is healthy and DB is connected!"
+              exit 0
+            fi
+            echo "Attempt $i/20: App not ready yet. Sleeping 10s..."
+            sleep 10
+          done
+          echo "Error: App failed to become healthy in time."
+          docker ps -a
+          docker logs userservice
+          exit 1
+
+      - name: Stop and Remove Container
         if: always()
-        run: docker stop userservice
+        run: |
+          docker stop userservice || true
+          docker rm userservice || true
 
   # ==========================================================
   # 8️⃣ DOCKER PUSH
