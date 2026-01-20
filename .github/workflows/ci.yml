@@ -216,6 +216,24 @@ jobs:
     name: Container Runtime Test
     runs-on: ubuntu-latest
     needs: [container-scan]
+    
+    # MySQL service container
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: userservice
+          MYSQL_USER: user
+          MYSQL_PASSWORD: user1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    
     steps:
       - name: Download Docker Image
         uses: actions/download-artifact@v4
@@ -226,13 +244,24 @@ jobs:
       - name: Load Docker Image
         run: docker load --input /tmp/image.tar
 
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          sleep 10
+
       - name: Run Container
         run: |
           docker run -d --name userservice \
-            -p 4141:4141 \
-            -e MYSQL_HOST=localhost \
+            --network host \
+            -e SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/userservice \
+            -e SPRING_DATASOURCE_USERNAME=user \
+            -e SPRING_DATASOURCE_PASSWORD=user1234 \
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-          sleep 15
+          sleep 20
+
+      - name: Check Container Logs
+        if: always()
+        run: docker logs userservice
 
       - name: Health Check
         run: |
