@@ -5,6 +5,8 @@ on:
     workflows: ["CI Pipeline"]
     types: [completed]
     branches: [main]
+env:
+  KUBECONFIG: /home/ubuntu/.kube/config
 
 jobs:
   deploy:
@@ -15,6 +17,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check K8s Connectivity
+        run: |
+          kubectl cluster-info
+          kubectl config current-context
 
       - name: Create Namespace
         run: kubectl apply -f k8s/namespace.yaml
