@@ -31,8 +31,8 @@ jobs:
         run: mvn checkstyle:check
         continue-on-error: true
 
-      - name: Run Maven Verify
-        run: mvn verify
+      - name: Build and Lint (No Tests)
+        run: mvn verify -DskipTests
 
   # ==========================================================
   # 2️⃣ SAST – CodeQL
@@ -108,6 +108,23 @@ jobs:
     name: Build & Unit Tests
     runs-on: ubuntu-latest
     needs: [code-quality]
+
+    # MySQL service container for unit tests
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: userservice
+          MYSQL_USER: user
+          MYSQL_PASSWORD: user1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
