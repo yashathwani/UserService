@@ -26,7 +26,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
-          cache: 'jdk'  
 
       - name: Run Checkstyle
         run: mvn checkstyle:check
@@ -55,7 +54,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
-          cache: 'jdk'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -68,7 +66,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
-          cache: 'jdk'
 
       - name: Build Application
         run: mvn clean package -DskipTests
@@ -92,7 +89,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
-          cache: 'jdk'
 
       - name: OWASP Dependency Check
         run: mvn org.owasp:dependency-check-maven:check
@@ -122,7 +118,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
-          cache: 'jdk'
 
       - name: Run Unit Tests
         run: mvn test
