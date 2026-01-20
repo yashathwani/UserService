@@ -20,17 +20,17 @@ jobs:
 
       - name: Check K8s Connectivity
         run: |
-          kubectl cluster-info
-          kubectl config current-context
+          kubectl --kubeconfig /home/ubuntu/.kube/config cluster-info
+          kubectl --kubeconfig /home/ubuntu/.kube/config config current-context
 
       - name: Create Namespace
-        run: kubectl apply -f k8s/namespace.yaml
+        run: kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/namespace.yaml
 
       - name: Deploy Application
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl rollout status deployment/userservice-deployment -n userservice-ns
+          kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/deployment.yaml
+          kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/service.yaml
+          kubectl --kubeconfig /home/ubuntu/.kube/config rollout status deployment/userservice-deployment -n userservice-ns
 
   dast:
     name: Security Scan (DAST)
