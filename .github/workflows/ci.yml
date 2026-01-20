@@ -10,9 +10,7 @@ env:
   JAVA_VERSION: '17'
 
 jobs:
-  # ==========================================================
-  # 1️⃣ CODE QUALITY – Checkstyle
-  # ==========================================================
+  # Code Quality and Linting
   code-quality:
     name: Code Quality Check
     runs-on: ubuntu-latest
@@ -34,9 +32,7 @@ jobs:
       - name: Build and Lint (No Tests)
         run: mvn verify -DskipTests
 
-  # ==========================================================
-  # 2️⃣ SAST – CodeQL
-  # ==========================================================
+  # SAST Scanning
   sast-codeql:
     name: SAST - CodeQL Analysis
     runs-on: ubuntu-latest
@@ -73,9 +69,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
 
-  # ==========================================================
-  # 3️⃣ SCA – OWASP Dependency‑Check
-  # ==========================================================
+  # SCA Scanning
   sca-dependency-check:
     name: SCA - Dependency Vulnerability Scan
     runs-on: ubuntu-latest
@@ -101,9 +95,7 @@ jobs:
           name: dependency-check-report
           path: target/dependency-check-report.html
 
-  # ==========================================================
-  # 4️⃣ BUILD & TEST
-  # ==========================================================
+  # Build and Unit Tests
   build-and-test:
     name: Build & Unit Tests
     runs-on: ubuntu-latest
@@ -148,9 +140,7 @@ jobs:
           name: application-jar
           path: target/*.jar
 
-  # ==========================================================
-  # 5️⃣ DOCKER BUILD
-  # ==========================================================
+  # Docker Build
   docker-build:
     name: Docker Image Build
     runs-on: ubuntu-latest
@@ -184,9 +174,7 @@ jobs:
           name: docker-image
           path: /tmp/image.tar
 
-  # ==========================================================
-  # 6️⃣ CONTAINER SCAN – Trivy
-  # ==========================================================
+  # Container Security Scan
   container-scan:
     name: Container Vulnerability Scan
     runs-on: ubuntu-latest
@@ -228,9 +216,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
-  # ==========================================================
-  # 7️⃣ RUNTIME VALIDATION
-  # ==========================================================
+  # Runtime Validation
   runtime-test:
     name: Container Runtime Test
     runs-on: ubuntu-latest
@@ -275,6 +261,9 @@ jobs:
             -e SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/userservice \
             -e SPRING_DATASOURCE_USERNAME=user \
             -e SPRING_DATASOURCE_PASSWORD=user1234 \
+            -e SERVER_PORT=4141 \
+            -e MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health \
+            -e MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always \
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
       - name: Diagnostic - Container Status
@@ -305,9 +294,7 @@ jobs:
           docker stop userservice || true
           docker rm userservice || true
 
-  # ==========================================================
-  # 8️⃣ DOCKER PUSH
-  # ==========================================================
+  # Push to Registry
   docker-push:
     name: Push to DockerHub
     runs-on: ubuntu-latest
