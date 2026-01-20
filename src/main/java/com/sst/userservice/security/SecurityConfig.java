@@ -80,8 +80,10 @@ public class SecurityConfig {
 			throws Exception {
 		http
 			.authorizeHttpRequests((authorize) -> authorize
+				.requestMatchers("/users/signup", "/users/login", "/actuator/**").permitAll()
 				.anyRequest().authenticated()
 			)
+			.csrf(csrf -> csrf.disable())
 			// Form login handles the redirect to the login page from the
 			// authorization server filter chain
 			.formLogin(Customizer.withDefaults());
