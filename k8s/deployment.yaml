@@ -19,6 +19,15 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 4141
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:h2:mem:userservicedb;DB_CLOSE_DELAY=-1;MODE=MySQL"
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          value: "org.h2.Driver"
+        - name: SPRING_JPA_DATABASE_PLATFORM
+          value: "org.hibernate.dialect.H2Dialect"
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
         livenessProbe:
           httpGet:
             path: /actuator/health
