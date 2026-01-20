@@ -28,9 +28,20 @@ jobs:
 
       - name: Deploy Application
         run: |
+          echo "Applying Kubernetes manifests..."
+          kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/namespace.yaml || true
           kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/deployment.yaml
           kubectl --kubeconfig /home/ubuntu/.kube/config apply -f k8s/service.yaml
-          kubectl --kubeconfig /home/ubuntu/.kube/config rollout status deployment/userservice-deployment -n userservice-ns
+
+          echo "Waiting for rollout to complete..."
+          kubectl --kubeconfig /home/ubuntu/.kube/config rollout status deployment/userservice-deployment -n userservice-ns --timeout=300s
+
+          echo "Checking pods and events after rollout attempt..."
+          kubectl --kubeconfig /home/ubuntu/.kube/config get all -n userservice-ns
+          kubectl --kubeconfig /home/ubuntu/.kube/config describe deployment userservice-deployment -n userservice-ns
+          kubectl --kubeconfig /home/ubuntu/.kube/config get pods -n userservice-ns -o wide
+          kubectl --kubeconfig /home/ubuntu/.kube/config describe pods -n userservice-ns | tail -n 100
+          kubectl --kubeconfig /home/ubuntu/.kube/config get events -n userservice-ns --sort-by=.metadata.creationTimestamp | tail -n 20
 
   dast:
     name: Security Scan (DAST)
