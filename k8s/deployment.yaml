@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice-deployment
+  namespace: userservice-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userservice
+  template:
+    metadata:
+      labels:
+        app: userservice
+    spec:
+      containers:
+      - name: userservice
+        image: yashathwani/userservice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4141
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 4141
+          initialDelaySeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 4141
+          initialDelaySeconds: 60

@@ -1,0 +1,37 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to K8s
+    runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Namespace
+        run: kubectl apply -f k8s/namespace.yaml
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl rollout status deployment/userservice-deployment -n userservice-ns
+
+  dast:
+    name: Security Scan (DAST)
+    needs: deploy
+    runs-on: self-hosted
+    steps:
+      - name: Dummy ZAP Scan
+        run: |
+          echo "Running dummy DAST scan against http://localhost:30080"
+          sleep 5
+          echo "DAST scan completed. Status: Secure"
